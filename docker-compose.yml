@@ -1,0 +1,27 @@
+version: '3.7'
+
+services:
+  redis:
+    image: redis:6.2
+    ports:
+      - '6379:6379'
+    hostname: 'redis'
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '8000:8000'
+    volumes:
+      - .:/code
+    command: sh -c "python manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      - redis
+  celery:
+    build: .
+    command: celery -A config.celery worker --loglevel=INFO
+    volumes:
+      - .:/code
+    depends_on:
+      - app
+      - redis
