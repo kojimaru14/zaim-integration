@@ -5,6 +5,7 @@ if [[ $DYNO == "web"* ]]; then
   python manage.py runserver --settings=config.settings.prod
   echo "Zaim web process started"
 elif  [[ $DYNO == "worker"* ]]; then
+  export DJANGO_SETTINGS_MODULE=config.settings.prod
   celery -A config.celery worker --loglevel=INFO
   echo "Zaim worker process started"
 fi
