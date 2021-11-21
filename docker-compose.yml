@@ -23,7 +23,7 @@ services:
     build: .
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings.dev
-    command: celery -A config.celery worker --loglevel=INFO
+    command: python manage.py celery_worker
     volumes:
       - .:/code
     depends_on:
