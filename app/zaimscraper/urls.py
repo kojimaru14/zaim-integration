@@ -5,5 +5,6 @@ app_name = 'zaim'
 
 urlpatterns = [
     path('', views.hello_world, name="index"),
-    path('task', views.task, name="task"),
+    path('run', views.run_task, name="run_task"),
+    path('tasks', views.list_tasks, name="list_tasks")
 ]
