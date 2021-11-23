@@ -9,7 +9,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.web
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings.dev
     ports:

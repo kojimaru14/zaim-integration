@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Building image for web
-docker build -t registry.heroku.com/$HEROKU_APP_NAME/web -f ./Dockerfile.prod .;
+docker build -t registry.heroku.com/$HEROKU_APP_NAME/web -f ./Dockerfile.web .;
 # Push a built image: https://devcenter.heroku.com/articles/container-registry-and-runtime#pushing-an-existing-image
 docker push registry.heroku.com/$HEROKU_APP_NAME/web;
 # Releasing an image: https://devcenter.heroku.com/articles/container-registry-and-runtime#releasing-an-image
