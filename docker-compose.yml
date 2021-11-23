@@ -20,7 +20,9 @@ services:
     depends_on:
       - redis
   celery:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.celery
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings.dev
     command: python manage.py celery_worker

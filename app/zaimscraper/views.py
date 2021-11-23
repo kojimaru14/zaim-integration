@@ -1,6 +1,7 @@
 from django.http.response import JsonResponse
 from django.http import HttpResponse
 from celery.result import AsyncResult
+import base64
 
 # Create your views here.
 SESSION_KEY = 'celery_tasks'
@@ -18,7 +19,17 @@ from . import tasks
 View for adding tasks
 '''
 def run_task(request):
-  task = tasks.add.delay(20, 30)
+
+  # TODO: Authorization should be de-coupled and placed in a separted code
+  if 'HTTP_AUTHORIZATION' not in request.META:
+    return HttpResponse('Unauthorized', status=401)
+  (auth_scheme, base64_username_pass) = request.META['HTTP_AUTHORIZATION'].split(' ', 1)
+  if auth_scheme.lower() != 'basic':
+    return HttpResponse('Unauthorized', status=401)
+  username_pass = base64.decodebytes(base64_username_pass.strip().encode('ascii')).decode('ascii')
+  (username, password) = username_pass.split(':', 1)
+
+  task = tasks.scrape.delay(username, password)
 
   my_tasks = request.session.get(SESSION_KEY)
 
