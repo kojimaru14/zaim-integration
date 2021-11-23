@@ -4,6 +4,5 @@ WORKDIR /code
 ADD requirements.txt /code/
 RUN pip install -r requirements.txt
 ADD . /code/
-
 # Run django server (CMD is overriden if run via docker-compose.yml)
-CMD python manage.py runserver 0.0.0.0:$PORT --settings=config.settings.prod
+CMD gunicorn config.wsgi --log-file -
