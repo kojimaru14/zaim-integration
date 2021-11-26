@@ -9,6 +9,23 @@ def add(x1, x2):
     print('処理完了', y, __file__)
     return y
 
+'''
+from selenium.webdriver import Chrome, ChromeOptions, Remote
+@shared_task
+def scrape():
+    print("Test haha1234")
+
+    options = ChromeOptions()
+    options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+
+    # pythonファイルと同じディレクトリにchromeriver.exeがある場合引数は空でOK
+    driver = Chrome(executable_path='/usr/local/bin/chromedriver', options=options)
+
+    driver.get('https://point.rakuten.co.jp/history/?l-id=point_top_history_pc')
+    
+'''
 from .zaim import ZaimCrawler
 @shared_task
 def scrape(username, password):

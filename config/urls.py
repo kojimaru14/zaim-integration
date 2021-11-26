@@ -18,7 +18,7 @@ from django.urls import path, include
 
 urlpatterns = [
    path('admin/', admin.site.urls),
-#    path('', TopPage.as_view(), name='toppage’),                       # Top page
-   path('zaim/', include('app.zaimscraper.urls'), name="zaimscraper"),  # Zaim
-#    path('rakuten/', include('rakutenscraper.urls')),                  # Rakuten
+#    path('', TopPage.as_view(), name='toppage’),               # Top page
+   path('zaim/', include('app.scraper.urls'), name="scraper"),  # Zaim
+#    path('rakuten/', include('rakutenscraper.urls')),          # Rakuten
 ]
