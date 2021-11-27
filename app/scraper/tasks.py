@@ -9,26 +9,9 @@ def add(x1, x2):
     print('処理完了', y, __file__)
     return y
 
-'''
-from selenium.webdriver import Chrome, ChromeOptions, Remote
-@shared_task
-def scrape():
-    print("Test haha1234")
-
-    options = ChromeOptions()
-    options.add_argument('--headless')
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
-
-    # pythonファイルと同じディレクトリにchromeriver.exeがある場合引数は空でOK
-    driver = Chrome(executable_path='/usr/local/bin/chromedriver', options=options)
-
-    driver.get('https://point.rakuten.co.jp/history/?l-id=point_top_history_pc')
-    
-'''
 from .zaim import ZaimCrawler
 @shared_task
-def scrape(username, password):
+def scrape(username, password, year, month):
   # Chrome Driverの起動とZaimへのログイン、ログインには少し時間がかかります
   crawler = ZaimCrawler(username, password,
                         driver_path='/usr/local/bin/chromedriver',
@@ -36,7 +19,7 @@ def scrape(username, password):
 
   try:
     # データの取得 (データの取得には少し時間がかかります、時間はデータ件数による)
-    data = crawler.get_data('2021', '11', progress=True) # progressをFalseにするとプログレスバーを非表示にできる
+    data = crawler.get_data(year, month, progress=True) # progressをFalseにするとプログレスバーを非表示にできる
   except Exception as e:
     print(e)
     crawler.close()

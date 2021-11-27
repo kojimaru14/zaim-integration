@@ -2,6 +2,7 @@ from django.http.response import JsonResponse
 from django.http import HttpResponse
 from celery.result import AsyncResult
 import base64
+import datetime
 
 # Create your views here.
 SESSION_KEY = 'celery_tasks'
@@ -29,7 +30,11 @@ def run_task(request):
   username_pass = base64.decodebytes(base64_username_pass.strip().encode('ascii')).decode('ascii')
   (username, password) = username_pass.split(':', 1)
 
-  task = tasks.scrape.delay(username, password)
+  if request.method == "GET" and "year" in request.GET and "month" in request.GET:
+    task = tasks.scrape.delay(username, password, request.GET.get("year"), request.GET.get("month") )
+  else:
+    dt_now = datetime.datetime.now()
+    task = tasks.scrape.delay(username, password, dt_now.year, dt_now.month)
 
   my_tasks = request.session.get(SESSION_KEY)
 
