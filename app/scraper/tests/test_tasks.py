@@ -9,6 +9,7 @@ class TestTasks(TestCase):
     self.assertEqual(result, 10)
 
   def test_scrape_succeed(self):
+    print(settings.ZAIM_USER, settings.ZAIM_PASSWORD)
     result = tasks.scrape_and_upload(settings.ZAIM_USER, settings.ZAIM_PASSWORD, "2021", "08")
     self.assertEqual(result, 1)
 
