@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'app.scraper',
     'config',
     'django_celery_results',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [

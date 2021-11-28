@@ -4,14 +4,16 @@ services:
   - docker
 env:
   global:
-    - GIT_SHA=$(git rev-parse HEAD)
+  - secure: ZMz271eASKKEr45fxglbwyPJhEhnIa9cUAf7wQpz72lYcLst2H1OzZ7qAgT3x2pUFOgZUfEtHJEziObmTHUCBlVdap194qnaQVAmFRFnk8MLR6Q2gkgedWToVy3eFeTATOMg5cHlQTrYAvxtB9ftPLSabynZkMMQEMbeSEqpa1QpXk0jNWBmYrVVClOiXs3RxJDJNQIvJmj60T0N6+YMOoepiFZYjmtIeW+hkN8v5it7os94PMAtX4vEMYXZEOQAs1P+51mNE8HbR5HUBWZMVJoL5DWPk21NG++5C0ATG9TYYfPruV61rSfjs/J+lUzbsWVSvpw7OBjQIPDgP0vYz4m8uLZI98IN0zFy36z54uPNUuMqeKoV63QkiBC1bOIh4DYBQRIC4HlYmrHGyMmJ83ueRZ1Uxb65NftBHTI16T0nGmISZhLje3Wd45p7U7zl+1De0V8B2pzn1S2wyTbFCQVpDprYb/CaAcxn2xaqiswGWiWJLtgEJePIGEmrCN4FrLZeQGEOP2cs9mSxIcxlRUEPONN+1nYCiXU1mL7hqjuMKm05zsztwTG7p53iW+BT3SVylJAXKiHjtPXlolpSWCVZmiSne+r+H9+0IJZjy6JzW0TaVabWsZm/k3ANd3Gwuu12q3JmXUYFqQ+VFTuUeZ98S7/7PiKdmRi4C87u02U=
+  - secure: xraaqBzLW/cSr/WV8liSS7f6PRmWsUMHQUbXhd1hrAsn3CmZ8wRIsL6ANmmXDPrWuaBp1h0K+Yhus+UVYZdnNO3rLNMzNoPzWJRjEbUn68C8HTHwqdcLh9z0VZLdZojbeba7KVjWhKfSkT5V2NTdPVQlIgHEuF/1ucvk31REABoXfh/YEiO7vlDuJqA849z4OVYMMmaj+Xr87aG2TVbML7CkYFfQsM/VeaWwp2ahbjbsShgnFSfj9Om3a6+A2Iu7q5PzUU2IO6c6wlysTCw1fdrNkodmgxp+W2H/2gvCro5UT73XHnk9QiHWeCDmxrysunrcV6XV6kkNKZirWbzy3oBgUeOA3ViVAkYb/S7bXxfJfDPpqYM5LBUMhJkbAZFv5lTldqeILBZMFLgT12mrlCR0RbZdz+sgXvWStEvcYI6oYAUBTfmcExT/Y69BQytL5vOynt3EAIefODA/7JOcpkDVfyYU2RZ1Kf7flZgtPAOopsOLKDtZMdOsjVX+NViAiqhQ+hfb8JcKlDOdrDzC8YsJ9NTcCbrNKhOx3tG2nWMmpwHQuGc0Kgp4PR6fEt2lTOJ71J7LISMGTkgjmtQRosope1P2YkLUK0ww5DHs6uLg6jTrc4wyFCLMwY4Bq93vnzHImbwgltWP1Hn4/Ck3xKFDCE78mC5zerDGah5ORss=
 before_install:
   # https://docs.travis-ci.com/user/docker/#pushing-a-docker-image-to-a-registry
   - echo "$HEROKU_API_KEY" | docker login --username=_ --password-stdin registry.heroku.com
-
 deploy:
   provider: script
-  script: bash ./deploy.sh
+  script:
+  - python manage.py test app --settings=config.settings.prod
+  - bash ./deploy.sh
   on:
     branch:
       - main
