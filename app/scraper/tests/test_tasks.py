@@ -10,7 +10,7 @@ class TestTasks(TestCase):
 
   def test_scrape_succeed(self):
     print(settings.ZAIM_USER, settings.ZAIM_PASSWORD)
-    result = tasks.scrape_and_upload(settings.ZAIM_USER, settings.ZAIM_PASSWORD, "2021", "08")
+    result = tasks.scrape_and_upload(settings.ZAIM_USER, settings.ZAIM_PASSWORD, "2015", "01")
     self.assertEqual(result, 1)
 
   def test_scrape_fail(self):
