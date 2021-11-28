@@ -31,10 +31,10 @@ def run_task(request):
   (username, password) = username_pass.split(':', 1)
 
   if request.method == "GET" and "year" in request.GET and "month" in request.GET:
-    task = tasks.scrape.delay(username, password, request.GET.get("year"), request.GET.get("month") )
+    task = tasks.scrape_and_upload.delay(username, password, request.GET.get("year"), request.GET.get("month") )
   else:
     dt_now = datetime.datetime.now()
-    task = tasks.scrape.delay(username, password, dt_now.year, dt_now.month)
+    task = tasks.scrape_and_upload.delay(username, password, dt_now.year, dt_now.month)
 
   my_tasks = request.session.get(SESSION_KEY)
 

@@ -1,34 +1,53 @@
 from celery import shared_task
 
 import time
-# タスクとして利用する関数の引数に直接クエリセットのオブジェクトを渡すことはできない
 @shared_task
 def add(x1, x2):
-    time.sleep(30)
+    time.sleep(10)
     y = x1 + x2
     print('処理完了', y, __file__)
     return y
 
-from .zaim import ZaimCrawler
+
+import csv
 @shared_task
-def scrape(username, password, year, month):
-  # Chrome Driverの起動とZaimへのログイン、ログインには少し時間がかかります
-  crawler = ZaimCrawler(username, password,
-                        driver_path='/usr/local/bin/chromedriver',
-                        poor=True)
+# Output: 1 if succeed, 0 if failed
+def scrape_and_upload(username, password, year, month):
+
+  file_name = '{}-{}.csv'.format(year, month)
 
   try:
-    # データの取得 (データの取得には少し時間がかかります、時間はデータ件数による)
-    data = crawler.get_data(year, month, progress=True) # progressをFalseにするとプログレスバーを非表示にできる
+    data = scrape(username, password, year, month)
+    to_csv = list(data)
   except Exception as e:
     print(e)
-    crawler.close()
-    return 
+    return 0
   
-  for el in data:
-    # {'id': '5419217736', 'count': '常に含める', 'date': datetime.datetime(2021, 11, 3, 0, 0), 'category': '税金', 'genre': '住民税', 'amount': 7000, 'from_account': 'PayPay', 'type': 'payment', 'place': 'さとふる', 'name': 'レーズンサンド3…', 'comment': ''}
-    print(el)
+  with open(file_name, 'w', encoding='utf8', newline='') as output_file:
+      dict_writer = csv.DictWriter(output_file, to_csv[0].keys())
+      dict_writer.writeheader()
+      dict_writer.writerows(to_csv)
 
-  # 終了処理
+  return 1
+
+
+from .zaim import ZaimCrawler
+# Output: list_reverseiterator or exception
+def scrape(username, password, year, month):
+
+  try:
+    crawler = ZaimCrawler(username, password,
+                          driver_path='/usr/local/bin/chromedriver',
+                          poor=True)
+  except:
+    import chromedriver_binary
+    crawler = ZaimCrawler(username, password,
+                          poor=True)
+
+  # データの取得 (データの取得には少し時間がかかります、時間はデータ件数による)
+  data = crawler.get_data(year, month, progress=True) # progressをFalseにするとプログレスバーを非表示にできる
+ 
+   # 終了処理
   crawler.close()
-  return
+  
+  return data
