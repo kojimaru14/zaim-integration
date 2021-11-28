@@ -15,7 +15,7 @@ script:
 # - docker-compose run app python manage.py migrate
 # - docker-compose run app python manage.py test app
   - docker build -t lyugaloki/zaim-celery -f Dockerfile.celery .
-  - docker run -it --env DJANGO_SETTINGS_MODULE=config.settings.prod lyugaloki/zaim-celery python manage.py test app # The test is run with celery image because celery container has chromedriver installed - which is required for scraping tests
+  - docker run -it $(printenv | grep -E '^ZAIM_' | sed 's/ZAIM_/--env /g') --env DJANGO_SETTINGS_MODULE=config.settings.prod lyugaloki/zaim-celery python manage.py test app # The test is run with celery image because celery container has chromedriver installed - which is required for scraping tests
 # travis without dockerization
 # - python manage.py makemigrations
 # - python manage.py migrate
