@@ -3,8 +3,8 @@
 export DJANGO_SETTINGS_MODULE=config.settings.prod
 
 # Google credentials are saved in env variable, so export it to a file.
-if [ -f ./service_account.json ]; then
-  echo ${GOOGLE_CREDENTIALS} > service_account.json
+if [ -f /code/service_account.json ]; then
+  echo ${GOOGLE_CREDENTIALS} > /code/service_account.json
 fi
 
 # https://help.heroku.com/YNG7SACF/how-do-i-define-a-start-command-for-an-app-using-docker-images
