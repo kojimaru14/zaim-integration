@@ -9,6 +9,7 @@ def add(x1, x2):
     return y
 
 
+from .google import upload_to_google
 import csv
 @shared_task
 # Output: 1 if succeed, 0 if failed
@@ -27,6 +28,8 @@ def scrape_and_upload(username, password, year, month):
       dict_writer = csv.DictWriter(output_file, to_csv[0].keys())
       dict_writer.writeheader()
       dict_writer.writerows(to_csv)
+
+  upload_to_google(file_name, "text/csv", file_name, ['1yhw2cEo5nQ7Ym3oZ3mNIpCMuA6qmiwGB'])
 
   return 1
 
