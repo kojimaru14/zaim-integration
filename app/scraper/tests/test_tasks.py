@@ -1,6 +1,7 @@
 from app.scraper import tasks
 from django.test import TestCase
 from django.conf import settings
+import os
 
 class TestTasks(TestCase):
 
@@ -15,3 +16,8 @@ class TestTasks(TestCase):
   def test_scrape_fail(self):
     result = tasks.scrape_and_upload("wrong_user@gmail.com", "wrong_password", "2021", "11")
     self.assertEqual(result, 0)
+
+  def test_upload_file_succeed(self):
+    test_file = os.path.join(settings.BASE_DIR, "README.md")
+    result = tasks.upload_file(test_file, 'text/plain', "README.md", ['1yhw2cEo5nQ7Ym3oZ3mNIpCMuA6qmiwGB'])
+    self.assertEqual(result, True)

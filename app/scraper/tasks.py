@@ -51,3 +51,8 @@ def scrape(username, password, year, month):
   crawler.close()
   
   return data
+
+from .google import upload_to_google
+def upload_file(file_path, mimetype, new_name, parent_ids):
+  upload_to_google(file_path, mimetype, new_name, parent_ids)
+  return True
