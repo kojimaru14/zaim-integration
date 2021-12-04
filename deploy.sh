@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Add the content of JSON file (decrypted by openssl command on .travis.yml) to an env variable on Heroku
+heroku config:set GOOGLE_CREDENTIALS="$(< service-account.json)"
+
 # Building image for web
 docker build -t registry.heroku.com/$HEROKU_APP_NAME/web -f ./Dockerfile.web .;
 # Push a built image: https://devcenter.heroku.com/articles/container-registry-and-runtime#pushing-an-existing-image
