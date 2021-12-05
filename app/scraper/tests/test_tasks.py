@@ -19,5 +19,5 @@ class TestTasks(TestCase):
 
   def test_upload_file_succeed(self):
     test_file = os.path.join(settings.BASE_DIR, "README.md")
-    result = tasks.upload_file(test_file, 'text/plain', "README.md", ['1yhw2cEo5nQ7Ym3oZ3mNIpCMuA6qmiwGB'])
+    result = tasks.upload_file(test_file, 'text/plain', "README.md", ['1zfImy-dUKtcNJM0Rpg0iM7LwV2_az-Vi'])
     self.assertEqual(result, True)
