@@ -7,6 +7,8 @@ if [ -f /code/service_account.json ]; then
   echo ${GOOGLE_CREDENTIALS} > /code/service_account.json
 fi
 
+python manage.py migrate
+
 # https://help.heroku.com/YNG7SACF/how-do-i-define-a-start-command-for-an-app-using-docker-images
 if [[ $DYNO == "web"* ]]; then
   gunicorn config.wsgi --log-file -
