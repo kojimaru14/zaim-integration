@@ -1,7 +1,7 @@
 from .base import *
 import django_heroku
 
-DEBUG = False
+DEBUG = True
 ALLOWED_HOSTS = ['localhost','127.0.0.1','.herokuapp.com']
 
 CELERY_BROKER_URL = os.environ.get('REDIS_URL')
