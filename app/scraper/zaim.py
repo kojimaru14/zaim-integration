@@ -6,7 +6,11 @@ import calendar
 from requests_oauthlib import OAuth1Session
 from selenium.webdriver import Chrome, ChromeOptions, Remote
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import NoSuchElementException
 from tqdm import tqdm
+
+import logging
+logger = logging.getLogger(__name__)
 
 # Entirely copied from https://github.com/MagicalLiebe/pyzaim/blob/master/pyzaim/pyzaim.py
 # Credits to https://github.com/MagicalLiebe
@@ -388,15 +392,7 @@ class ZaimCrawler:
             if poor:
                 self.driver.set_window_size(480, 270)
 
-        print("Start Chrome Driver.")
-        login = False
-        retry = 1
-        while( retry <= MAX_RETRY and not login ):
-            print("Logging into Zaim. Attempt #{}".format(retry))
-            login = self.login(user_id, password, retry)
-            retry+=1
-
-        if login:
+        if self.login(user_id, password):
             print("Login succeeded.")
             self.data = []
             self.current = 0
@@ -405,17 +401,27 @@ class ZaimCrawler:
             self.close()
             raise Exception
 
-    def login(self, user_id, password, wait_time):
-        try:
-            self.driver.get("https://auth.zaim.net/")
-            time.sleep(1 * wait_time)
-            self.driver.find_element_by_id("UserEmail").send_keys(user_id)
-            self.driver.find_element_by_id("UserPassword").send_keys(password, Keys.ENTER)
-            time.sleep(1 * wait_time)
-            if len(self.driver.find_elements_by_xpath("//*[starts-with(@class, 'nav-profile')]")) > 0:
-                return True
-        except Exception as e:
-            print("login error", e)
+    def login(self, user_id, password):
+        retry = 1
+        print("Start Chrome Driver.")
+        self.driver.get("https://auth.zaim.net/")
+        while( retry <= MAX_RETRY ):
+            time.sleep(1 * retry)
+            print("Logging into Zaim. Attempt #{}".format(retry))
+            try:
+                self.driver.find_element_by_id("UserEmail").send_keys(user_id)
+                self.driver.find_element_by_id("UserPassword").send_keys(password, Keys.ENTER)
+                time.sleep(1 * retry)
+                if len(self.driver.find_elements_by_xpath("//*[starts-with(@class, 'nav-profile')]")) > 0: # if profile pic element exists, then login would have succeeded
+                    return True
+                elif len(self.driver.find_elements_by_id("UserLoginForm")) > 0: # if login form is still displayed after entering user credentials, then login would have failed due to incorrect user/password
+                    return False
+                else:
+                    logger.warning("It's unclear whether login succeeded or failed.")
+                    self.driver.get("https://auth.zaim.net/")
+            except NoSuchElementException as e: # if "UserEmail" and "UserPassword" are not found, maybe the page is taking long to load, so we wait and try again
+                logger.warning("NoSuchElementException with attempt #{}".format(retry), e)
+            retry += 1
         return False
 
     def get_data(self, year, month, progress=True):
