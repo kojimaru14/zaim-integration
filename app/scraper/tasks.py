@@ -35,14 +35,15 @@ def scrape_and_upload(username, password, year, month):
 
 
 from .zaim import ZaimCrawler
+from selenium.common.exceptions import WebDriverException
 # Output: list_reverseiterator or exception
 def scrape(username, password, year, month):
-
+  
   try:
     crawler = ZaimCrawler(username, password,
                           driver_path='/usr/local/bin/chromedriver',
                           poor=True)
-  except:
+  except WebDriverException:
     import chromedriver_binary
     crawler = ZaimCrawler(username, password,
                           poor=True)

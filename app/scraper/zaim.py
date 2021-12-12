@@ -16,6 +16,7 @@ authorize_url = "https://auth.zaim.net/users/auth"
 access_token_url = "https://api.zaim.net/v2/auth/access"
 callback_uri = "https://www.zaim.net/"
 
+MAX_RETRY = 3
 
 def get_access_token():
     consumer_id = input("Please input consumer ID : ")
@@ -386,18 +387,35 @@ class ZaimCrawler:
                 self.driver = Chrome(options=options)
             if poor:
                 self.driver.set_window_size(480, 270)
+
         print("Start Chrome Driver.")
-        print("Login to Zaim.")
+        login = False
+        retry = 1
+        while( retry <= MAX_RETRY and not login ):
+            print("Logging into Zaim. Attempt #{}".format(retry))
+            login = self.login(user_id, password, retry)
+            retry+=1
 
-        self.driver.get("https://auth.zaim.net/")
-        time.sleep(1)
+        if login:
+            print("Login succeeded.")
+            self.data = []
+            self.current = 0
+        else:
+            print("Login failed.")
+            raise Exception
 
-        self.driver.find_element_by_id("UserEmail").send_keys(user_id)
-        self.driver.find_element_by_id("UserPassword").send_keys(password, Keys.ENTER)
-        time.sleep(1)
-        # print("Login Success.")
-        self.data = []
-        self.current = 0
+    def login(self, user_id, password, wait_time):
+        try:
+            self.driver.get("https://auth.zaim.net/")
+            time.sleep(1 * wait_time)
+            self.driver.find_element_by_id("UserEmail").send_keys(user_id)
+            self.driver.find_element_by_id("UserPassword").send_keys(password, Keys.ENTER)
+            time.sleep(1 * wait_time)
+            if len(self.driver.find_elements_by_xpath("//*[starts-with(@class, 'nav-profile')]")) > 0:
+                return True
+        except Exception as e:
+            print("login error", e)
+        return False
 
     def get_data(self, year, month, progress=True):
         day_len = calendar.monthrange(int(year), int(month))[1]
