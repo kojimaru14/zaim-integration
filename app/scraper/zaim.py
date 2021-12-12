@@ -402,6 +402,7 @@ class ZaimCrawler:
             self.current = 0
         else:
             print("Login failed.")
+            self.close()
             raise Exception
 
     def login(self, user_id, password, wait_time):
