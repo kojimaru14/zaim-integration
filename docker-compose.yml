@@ -33,6 +33,7 @@ services:
       - app
       - redis
       - db
+    restart: always
   db:
     image: postgres
     ports:
