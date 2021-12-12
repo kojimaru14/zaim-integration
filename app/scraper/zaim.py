@@ -489,9 +489,13 @@ class ZaimCrawler:
             m_from = items[5].find_elements_by_tag_name("img")
             if len(m_from) != 0:
                 item["from_account"] = m_from[0].get_attribute("data-title")
+            else:
+                item["from_account"] = ""
             m_to = items[6].find_elements_by_tag_name("img")
             if len(m_to) != 0:
                 item["to_account"] = m_to[0].get_attribute("data-title")
+            else:
+                item["to_account"] = ""
             item["type"] = (
                 "transfer" if "from_account" in item and "to_account" in item else "payment" if "from_account" in item else "income" if "to_account" in item else None
             )
