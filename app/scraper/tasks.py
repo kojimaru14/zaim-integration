@@ -1,5 +1,8 @@
 from celery import shared_task
 
+import logging
+logger = logging.getLogger(__name__)
+
 import time
 @shared_task
 def add(x1, x2):
@@ -21,18 +24,25 @@ def scrape_and_upload(username, password, year, month):
     data = scrape(username, password, year, month)
     to_csv = list(data)
   except Exception as e:
-    print(e)
+    logger.error("Zaim login exception", e)
     return 0
   
-  with open(file_name, 'w', encoding='utf8', newline='') as output_file:
-      dict_writer = csv.DictWriter(output_file, to_csv[0].keys())
-      dict_writer.writeheader()
-      dict_writer.writerows(to_csv)
+  try:
+    with open(file_name, 'w', encoding='utf8', newline='') as output_file:
+        dict_writer = csv.DictWriter(output_file, to_csv[0].keys())
+        dict_writer.writeheader()
+        dict_writer.writerows(to_csv)
+  except Exception as e:
+    logger.error("CSV write exception", e)
+    return 0
 
-  upload_to_google(file_name, "text/csv", file_name, ['1yhw2cEo5nQ7Ym3oZ3mNIpCMuA6qmiwGB'])
+  try:
+    upload_to_google(file_name, "text/csv", file_name, ['1yhw2cEo5nQ7Ym3oZ3mNIpCMuA6qmiwGB'])
+  except Exception as e:
+    logger.error("GDrive upload exception", e)
+    return 0
 
   return 1
-
 
 from .zaim import ZaimCrawler
 from selenium.common.exceptions import WebDriverException
