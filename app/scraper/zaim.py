@@ -397,9 +397,8 @@ class ZaimCrawler:
             self.data = []
             self.current = 0
         else:
-            print("Login failed.")
             self.close()
-            raise Exception
+            raise ZaimCrawlerException("Login failed for unknown reason.")
 
     def login(self, user_id, password):
         retry = 1
@@ -413,9 +412,11 @@ class ZaimCrawler:
                 self.driver.find_element_by_id("UserPassword").send_keys(password, Keys.ENTER)
                 time.sleep(1 * retry)
                 if len(self.driver.find_elements_by_xpath("//*[starts-with(@class, 'nav-profile')]")) > 0: # if profile pic element exists, then login would have succeeded
+                    print("Successfully logged in as {}".format(user_id))
                     return True
                 elif len(self.driver.find_elements_by_id("UserLoginForm")) > 0: # if login form is still displayed after entering user credentials, then login would have failed due to incorrect user/password
-                    return False
+                    self.close()
+                    raise ZaimCrawlerException("Failed to log in as '{}'. Check your user and/or password".format(user_id))
                 else:
                     logger.warning("It's unclear whether login succeeded or failed.")
                     self.driver.get("https://auth.zaim.net/")
@@ -538,3 +539,11 @@ class ZaimCrawler:
             return False
         else:
             return True
+
+class ZaimCrawlerException(Exception):
+    def __init__(self, message=''):
+        self.message = 'ZaimCrawlerException: {0}'.format(message)
+        logger.exception(self.message)
+
+    def __str__(self):
+       return self.message

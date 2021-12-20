@@ -20,27 +20,20 @@ def scrape_and_upload(username, password, year, month):
 
   file_name = '{}-{}.csv'.format(year, month)
 
-  try:
-    data = scrape(username, password, year, month)
-    to_csv = list(data)
-  except Exception as e:
-    logger.error("Zaim login exception", e)
-    return 0
+  data = scrape(username, password, year, month)
+  to_csv = list(data)
   
   try:
     with open(file_name, 'w', encoding='utf8', newline='') as output_file:
         dict_writer = csv.DictWriter(output_file, to_csv[0].keys())
         dict_writer.writeheader()
         dict_writer.writerows(to_csv)
+  except ValueError as e:
+    raise CsvWriteException("CSV write exception (ValueError): " + str(e) )
   except Exception as e:
-    logger.error("CSV write exception", e)
-    return 0
+    raise CsvWriteException("CSV write exception (Unknown error):" + str(e) )
 
-  try:
-    upload_to_google(file_name, "text/csv", file_name, ['1yhw2cEo5nQ7Ym3oZ3mNIpCMuA6qmiwGB'])
-  except Exception as e:
-    logger.error("GDrive upload exception", e)
-    return 0
+  upload_to_google(file_name, "text/csv", file_name, ['1yhw2cEo5nQ7Ym3oZ3mNIpCMuA6qmiwGB'])
 
   return 1
 
@@ -70,3 +63,14 @@ from .google import upload_to_google
 def upload_file(file_path, mimetype, new_name, parent_ids):
   upload_to_google(file_path, mimetype, new_name, parent_ids)
   return True
+
+class TaskException(Exception):
+    def __init__(self, message):
+        self.message = message
+
+    def log(self):
+        logger.exception(self.message + ':')
+
+class CsvWriteException(TaskException):
+    def __init__(self):
+        self.log()

@@ -68,8 +68,8 @@ def list_tasks(request):
 
     result[task_id] = {
       'status': task_result.status,
-      'result': task_result.result,
-      'traceback': task_result.traceback,
+      'result': str(task_result.result),
+      'traceback': str(task_result.traceback),
     }
 
   return JsonResponse(result)
