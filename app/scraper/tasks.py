@@ -13,25 +13,20 @@ def add(x1, x2):
 
 
 from .google import upload_to_google
-import csv
+import pandas as pd
 @shared_task
-# Output: 1 if succeed, 0 if failed
+# Output: 1 if succeed, raise Exception if failed
 def scrape_and_upload(username, password, year, month):
 
   file_name = '{}-{}.csv'.format(year, month)
 
   data = scrape(username, password, year, month)
-  to_csv = list(data)
   
   try:
-    with open(file_name, 'w', encoding='utf8', newline='') as output_file:
-        dict_writer = csv.DictWriter(output_file, to_csv[0].keys())
-        dict_writer.writeheader()
-        dict_writer.writerows(to_csv)
-  except ValueError as e:
-    raise CsvWriteException("CSV write exception (ValueError): " + str(e) )
+    df = pd.json_normalize(data['items'])
+    df.to_csv(file_name, encoding='utf-8')
   except Exception as e:
-    raise CsvWriteException("CSV write exception (Unknown error):" + str(e) )
+    raise CsvWriteException("CSV write exception:" + str(e) )
 
   upload_to_google(file_name, "text/csv", file_name, ['1yhw2cEo5nQ7Ym3oZ3mNIpCMuA6qmiwGB'])
 
@@ -39,7 +34,7 @@ def scrape_and_upload(username, password, year, month):
 
 from .zaim import ZaimCrawler
 from selenium.common.exceptions import WebDriverException
-# Output: list_reverseiterator or exception
+# Output: json data or exception
 def scrape(username, password, year, month):
   
   try:
@@ -51,10 +46,7 @@ def scrape(username, password, year, month):
     crawler = ZaimCrawler(username, password,
                           poor=True)
 
-  # データの取得 (データの取得には少し時間がかかります、時間はデータ件数による)
-  data = crawler.get_data(year, month, progress=True) # progressをFalseにするとプログレスバーを非表示にできる
- 
-   # 終了処理
+  data = crawler.get_json_data(year, month) 
   crawler.close()
   
   return data

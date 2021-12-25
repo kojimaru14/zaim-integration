@@ -2,6 +2,7 @@ import os
 import datetime
 import time
 import calendar
+import requests, json
 
 from requests_oauthlib import OAuth1Session
 from selenium.webdriver import Chrome, ChromeOptions, Remote
@@ -424,6 +425,21 @@ class ZaimCrawler:
                 logger.warning("NoSuchElementException with attempt #{}".format(retry), e)
             retry += 1
         return False
+
+    def get_json_data(self, year, month):
+        year = str(year)
+        month = str(month).zfill(2)
+        print("Getting data of {}/{}.".format(year, month))
+
+        session = requests.session()
+
+        #セッションの受け渡し
+        for cookie in self.driver.get_cookies():
+            session.cookies.set(cookie["name"], cookie["value"])
+
+        result = session.get("https://zaim.net/money/details?month={}{}".format(year, month))
+        data = json.loads(result.text)
+        return data
 
     def get_data(self, year, month, progress=True):
         day_len = calendar.monthrange(int(year), int(month))[1]
