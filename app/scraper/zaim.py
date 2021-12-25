@@ -505,7 +505,7 @@ class ZaimCrawler:
             else:
                 item["to_account"] = ""
             item["type"] = (
-                "transfer" if "from_account" in item and "to_account" in item else "payment" if "from_account" in item else "income" if "to_account" in item else None
+                "transfer" if item["from_account"]!="" and item["to_account"]!="" else "payment" if item["from_account"]!="" and item["to_account"]=="" else "income" if item["from_account"]=="" and item["to_account"]!="" else None
             )
             item["place"] = (
                 items[7].find_element_by_tag_name("span").text
