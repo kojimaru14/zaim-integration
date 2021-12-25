@@ -12,6 +12,7 @@ services:
       dockerfile: Dockerfile.web
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings.dev
+      - DB=postgres
     ports:
       - '8000:8000'
     volumes:
