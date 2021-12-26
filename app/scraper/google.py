@@ -12,9 +12,9 @@ def upload_to_google(file_path, mimetype, new_name, parent_ids):
   scoped_creds = sa_creds.with_scopes(SCOPES)
   drive_service = build('drive', 'v3', credentials=scoped_creds)
 
-  upload(drive_service, file_path, mimetype, new_name, parent_ids)
+  file_id = upload(drive_service, file_path, mimetype, new_name, parent_ids)
 
-  return True
+  return file_id
 
 # Doc on mimetypes: https://developers.google.com/drive/api/v3/mime-types
 def upload(drive_service, file_path, mimetype, name, parent_id):
@@ -23,6 +23,4 @@ def upload(drive_service, file_path, mimetype, name, parent_id):
   file = drive_service.files().create(body=file_metadata,
                                       media_body=media,
                                       fields='id').execute()
-  print ('File ID: %s' % file.get('id'))
-
-  return True
+  return file.get('id')

@@ -1,4 +1,4 @@
-from celery import shared_task
+from celery import shared_task, current_task
 
 import logging
 logger = logging.getLogger(__name__)
@@ -14,23 +14,36 @@ def add(x1, x2):
 
 from .google import upload_to_google
 import pandas as pd
-@shared_task
-# Output: 1 if succeed, raise Exception if failed
+@shared_task(bind=True)
+# Output: success message if succeed, raise Exception if failed
 def scrape_and_upload(username, password, year, month):
 
   file_name = '{}-{}.csv'.format(year, month)
+  folder_ids = ['1yhw2cEo5nQ7Ym3oZ3mNIpCMuA6qmiwGB']
 
+  current_task.update_state(
+    state="RUNNING",
+    meta={"Step": "Fetching zaim data"}
+  )
   data = scrape(username, password, year, month)
   
+  current_task.update_state(
+    state="RUNNING",
+    meta={"Step": "Writing fetched data to CSV"}
+  )
   try:
     df = pd.json_normalize(data['items'])
     df.to_csv(file_name, encoding='utf-8')
   except Exception as e:
     raise CsvWriteException("CSV write exception:" + str(e) )
 
-  upload_to_google(file_name, "text/csv", file_name, ['1yhw2cEo5nQ7Ym3oZ3mNIpCMuA6qmiwGB'])
+  current_task.update_state(
+    state="RUNNING",
+    meta={"Step": "Uploading CSV to Google Drive"}
+  )
+  file_id = upload_to_google(file_name, "text/csv", file_name, folder_ids)
 
-  return 1
+  return "{} (id: {}) has been uploaded to folder: {}".format(file_name, file_id, ' and '.join(folder_ids))
 
 from .zaim import ZaimCrawler
 from selenium.common.exceptions import WebDriverException
@@ -53,8 +66,8 @@ def scrape(username, password, year, month):
 
 from .google import upload_to_google
 def upload_file(file_path, mimetype, new_name, parent_ids):
-  upload_to_google(file_path, mimetype, new_name, parent_ids)
-  return True
+  file_id = upload_to_google(file_path, mimetype, new_name, parent_ids)
+  return file_id
 
 class TaskException(Exception):
     def __init__(self, message):

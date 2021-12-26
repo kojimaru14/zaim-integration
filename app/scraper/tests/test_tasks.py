@@ -5,19 +5,15 @@ import os
 
 class TestTasks(TestCase):
 
-  def test_add_task(self):
-    result = tasks.add(6,4)
-    self.assertEqual(result, 10)
-
   def test_scrape_succeed(self):
-    result = tasks.scrape_and_upload(settings.ZAIM_USER, settings.ZAIM_PASSWORD, "2021", "11")
-    self.assertEqual(result, 1)
+    result = tasks.scrape(settings.ZAIM_USER, settings.ZAIM_PASSWORD, "2021", "11")
+    self.assertTrue(type(result) is dict)
 
   def test_scrape_fail(self):
     with self.assertRaises(zaim.ZaimCrawlerException):
-      tasks.scrape_and_upload("wrong_user@gmail.com", "wrong_password", "2021", "11")
+      tasks.scrape("wrong_user@gmail.com", "wrong_password", "2021", "11")
 
   def test_upload_file_succeed(self):
     test_file = os.path.join(settings.BASE_DIR, "README.md")
-    result = tasks.upload_file(test_file, 'text/plain', "README.md", ['1zfImy-dUKtcNJM0Rpg0iM7LwV2_az-Vi'])
-    self.assertEqual(result, True)
+    file_id = tasks.upload_file(test_file, 'text/plain', "README.md", ['1zfImy-dUKtcNJM0Rpg0iM7LwV2_az-Vi'])
+    self.assertTrue(type(file_id) is str)
