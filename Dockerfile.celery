@@ -16,7 +16,7 @@ ENV DISPLAY=:99
 
 # Install and copy the necessary files to use Heroku Exec (SSH Tunneling) with Docker
 # Ref: https://devcenter.heroku.com/articles/exec#using-with-docker
-RUN apt-get install -y iproute2 --no-install-recommends
+RUN apt-get install -y iproute2 openssh-server --no-install-recommends
 ADD ./.profile.d /app/.profile.d
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
