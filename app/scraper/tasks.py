@@ -14,7 +14,7 @@ def add(x1, x2):
 
 from .google import upload_to_google
 import pandas as pd
-@shared_task(bind=True)
+@shared_task
 # Output: success message if succeed, raise Exception if failed
 def scrape_and_upload(username, password, year, month):
 
