@@ -130,3 +130,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # To mark celery task as "Started" when job is kicked off
 CELERY_TASK_TRACK_STARTED = True
+
+if 'worker' in sys.argv:
+    PROCESS_NAME = "celery"
+else:
+    PROCESS_NAME = "web"

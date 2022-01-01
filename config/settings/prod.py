@@ -30,7 +30,7 @@ LOGGING = {
         'file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, "logs", "django.log"),
+            'filename': os.path.join(BASE_DIR, "logs", "{}.log".format(PROCESS_NAME)),
             'formatter': 'production',
         },
         'console': {
