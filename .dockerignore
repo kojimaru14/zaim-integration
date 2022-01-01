@@ -1,0 +1,7 @@
+.vscode
+__pycache__/
+README.md
+db.sqlite3
+.travis.yml
+*.csv
+logs/*
