@@ -4,6 +4,10 @@ from celery.result import AsyncResult
 import base64
 import datetime
 
+# Add "@basic_auth" decorator to a function with which you want to perform authentication
+# More on decorators: https://blog.ikappio.com/decorating-specific-view-basic-authentication-in-django/
+from app.decorators.basic_auth_decorator import basic_auth
+
 # Create your views here.
 SESSION_KEY = 'celery_tasks'
 
@@ -15,20 +19,13 @@ def hello_world(request):
 
   return HttpResponse("Please use GET!!")
 
+
 from . import tasks
 '''
 View for adding tasks
 '''
-def run_task(request):
-
-  # TODO: Authorization should be de-coupled and placed in a separted code
-  if 'HTTP_AUTHORIZATION' not in request.META:
-    return HttpResponse('Unauthorized', status=401)
-  (auth_scheme, base64_username_pass) = request.META['HTTP_AUTHORIZATION'].split(' ', 1)
-  if auth_scheme.lower() != 'basic':
-    return HttpResponse('Unauthorized', status=401)
-  username_pass = base64.decodebytes(base64_username_pass.strip().encode('ascii')).decode('ascii')
-  (username, password) = username_pass.split(':', 1)
+@basic_auth
+def run_task(request, username='', password=''):
 
   if request.method == "GET" and "year" in request.GET and "month" in request.GET:
     task = tasks.scrape_and_upload.delay(username, password, request.GET.get("year"), request.GET.get("month") )
@@ -47,6 +44,29 @@ def run_task(request):
     "message": "Your task has been queued.",
     "task_id": task.id,
   })
+
+
+@basic_auth
+def run_rakuten_task(request, username='', password=''):
+
+  if request.method == "GET" and "year" in request.GET and "month" in request.GET:
+    task = tasks.scrape_rakuten.delay(username, password, request.GET.get("year"), request.GET.get("month") )
+  else:
+    dt_now = datetime.datetime.now()
+    task = tasks.scrape_rakuten.delay(username, password, dt_now.year, dt_now.month)
+
+  my_tasks = request.session.get(SESSION_KEY)
+
+  if not my_tasks:  # if no existing task, then save the task id as the value for the session key
+    request.session[SESSION_KEY] = task.id
+  else:             # if there are existing tasks, then concatenate them with the new task.
+    request.session[SESSION_KEY] = '{},{}'.format(my_tasks, task.id)
+  
+  return JsonResponse({
+    "message": "Your task has been queued.",
+    "task_id": task.id,
+  })
+
 
 '''
 View for getting task status

@@ -20,6 +20,7 @@ request_token_url = "https://api.zaim.net/v2/auth/request"
 authorize_url = "https://auth.zaim.net/users/auth"
 access_token_url = "https://api.zaim.net/v2/auth/access"
 callback_uri = "https://www.zaim.net/"
+login_url = "https://auth.zaim.net/"
 
 MAX_RETRY = 3
 
@@ -404,7 +405,7 @@ class ZaimCrawler:
     def login(self, user_id, password):
         retry = 1
         print("Start Chrome Driver.")
-        self.driver.get("https://auth.zaim.net/")
+        self.driver.get(login_url)
         while( retry <= MAX_RETRY ):
             time.sleep(1 * retry)
             print("Logging into Zaim. Attempt #{}".format(retry))
@@ -420,7 +421,7 @@ class ZaimCrawler:
                     raise ZaimCrawlerException("Failed to log in as '{}'. Check your user and/or password".format(user_id))
                 else:
                     logger.warning("It's unclear whether login succeeded or failed.")
-                    self.driver.get("https://auth.zaim.net/")
+                    self.driver.get(login_url)
             except NoSuchElementException as e: # if "UserEmail" and "UserPassword" are not found, maybe the page is taking long to load, so we wait and try again
                 logger.warning("NoSuchElementException with attempt #{}".format(retry), e)
             retry += 1

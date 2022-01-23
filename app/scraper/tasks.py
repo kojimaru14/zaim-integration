@@ -69,6 +69,21 @@ def upload_file(file_path, mimetype, new_name, parent_ids):
   file_id = upload_to_google(file_path, mimetype, new_name, parent_ids)
   return file_id
 
+from .rakuten import RakutenCrawler
+# Output: json data or exception
+@shared_task
+def scrape_rakuten(username, password, month, year):
+  
+  try:
+    crawler = RakutenCrawler(username, password, driver_path='/usr/local/bin/chromedriver')
+  except WebDriverException:
+    crawler = RakutenCrawler(username, password)
+
+  # data = crawler.get_point_history()
+  data = crawler.get_point_history(month, year)
+  crawler.close()
+  
+  return data
 class TaskException(Exception):
     def __init__(self, message):
         self.message = message
