@@ -20,5 +20,6 @@ urlpatterns = [
    path('admin/', admin.site.urls),
 #    path('', TopPage.as_view(), name='toppage’),               # Top page
    path('zaim/', include('app.scraper.urls'), name="scraper"),  # Zaim
+#    path('api/', include('app.scraper.urls'), name="api"),       # API
 #    path('rakuten/', include('rakutenscraper.urls')),          # Rakuten
 ]

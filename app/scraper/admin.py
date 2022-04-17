@@ -1,3 +1,5 @@
 from django.contrib import admin
+from .models import Zaim, Rakuten
 
-# Register your models here.
+admin.site.register(Zaim)
+admin.site.register(Rakuten)

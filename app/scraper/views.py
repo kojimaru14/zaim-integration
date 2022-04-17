@@ -1,7 +1,6 @@
 from django.http.response import JsonResponse
 from django.http import HttpResponse
 from celery.result import AsyncResult
-import base64
 import datetime
 
 # Add "@basic_auth" decorator to a function with which you want to perform authentication
@@ -10,6 +9,18 @@ from app.decorators.basic_auth_decorator import basic_auth
 
 # Create your views here.
 SESSION_KEY = 'celery_tasks'
+
+from rest_framework import viewsets
+from .models import Rakuten, Zaim
+from app.scraper.seralizers import RakutenSeralizer, ZaimSeralizer
+class RakutenViewSet(viewsets.ModelViewSet):
+  queryset = Rakuten.objects.all()
+  serializer_class = RakutenSeralizer
+
+class ZaimViewSet(viewsets.ModelViewSet):
+  queryset = Zaim.objects.all()
+  serializer_class = ZaimSeralizer
+
 
 # http://127.0.0.1:8000/zaim
 def hello_world(request):
