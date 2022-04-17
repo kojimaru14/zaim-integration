@@ -12,7 +12,6 @@ services:
       dockerfile: Dockerfile.web
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings.dev
-      - DB=postgres
     ports:
       - '8000:8000'
     volumes:
@@ -20,7 +19,6 @@ services:
     command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     depends_on:
       - redis
-      - db
   celery:
     build:
       context: .
@@ -33,12 +31,5 @@ services:
     depends_on:
       - app
       - redis
-      - db
     restart: always
-  db:
-    image: postgres
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_PASSWORD: postgres
 
