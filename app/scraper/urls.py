@@ -5,6 +5,7 @@ from rest_framework import routers
 app_name = 'zaim'
 
 router = routers.DefaultRouter()
+router.register('users', views.UserViewSet)
 router.register('rakuten', views.RakutenViewSet)
 router.register('zaim', views.ZaimViewSet)
 

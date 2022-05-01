@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'config',
     'django_celery_results',
     'rest_framework',
+    'rest_framework.authtoken'
 ]
 
 MIDDLEWARE = [

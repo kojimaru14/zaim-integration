@@ -15,11 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
    path('admin/', admin.site.urls),
 #    path('', TopPage.as_view(), name='toppage’),               # Top page
-   path('zaim/', include('app.scraper.urls'), name="scraper"),  # Zaim
+   path('api/', include('app.scraper.urls'), name="scraper"),   # Zaim
+   path('auth/', obtain_auth_token),
 #    path('api/', include('app.scraper.urls'), name="api"),       # API
 #    path('rakuten/', include('rakutenscraper.urls')),          # Rakuten
 ]

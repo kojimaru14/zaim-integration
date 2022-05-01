@@ -11,15 +11,25 @@ from app.decorators.basic_auth_decorator import basic_auth
 SESSION_KEY = 'celery_tasks'
 
 from rest_framework import viewsets
+from rest_framework.authentication import TokenAuthentication
+from django.contrib.auth.models import User
 from .models import Rakuten, Zaim
-from app.scraper.seralizers import RakutenSeralizer, ZaimSeralizer
+from app.scraper.seralizers import RakutenSeralizer, ZaimSeralizer, UserSeralizer
+
+
+class UserViewSet(viewsets.ModelViewSet):
+  queryset = User.objects.all()
+  serializer_class = UserSeralizer
+
 class RakutenViewSet(viewsets.ModelViewSet):
   queryset = Rakuten.objects.all()
   serializer_class = RakutenSeralizer
+  authentication_classes = (TokenAuthentication, )
 
 class ZaimViewSet(viewsets.ModelViewSet):
   queryset = Zaim.objects.all()
   serializer_class = ZaimSeralizer
+  authentication_classes = (TokenAuthentication, )
 
 
 # http://127.0.0.1:8000/zaim
