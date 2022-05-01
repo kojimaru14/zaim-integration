@@ -15,25 +15,33 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
 from .models import Rakuten, Zaim
-from app.scraper.seralizers import RakutenSeralizer, ZaimSeralizer, UserSeralizer
+from app.scraper.serializers import RakutenSerializer, ZaimSerializer, UserSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
   queryset = User.objects.all()
-  serializer_class = UserSeralizer
+  serializer_class = UserSerializer
+
 
 class RakutenViewSet(viewsets.ModelViewSet):
   queryset = Rakuten.objects.all()
-  serializer_class = RakutenSeralizer
+  serializer_class = RakutenSerializer
   authentication_classes = (TokenAuthentication, )
   permission_classes = (IsAuthenticated, )
+
+  def perform_create(self, serializer):
+    serializer.save(user=self.request.user)
 
 
 class ZaimViewSet(viewsets.ModelViewSet):
   queryset = Zaim.objects.all()
-  serializer_class = ZaimSeralizer
+  serializer_class = ZaimSerializer
   authentication_classes = (TokenAuthentication, )
   permission_classes = (IsAuthenticated, )
+
+  def perform_create(self, serializer):
+    serializer.save(user=self.request.user)
+    
 
 # http://127.0.0.1:8000/zaim
 def hello_world(request):

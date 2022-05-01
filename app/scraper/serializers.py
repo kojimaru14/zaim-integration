@@ -4,7 +4,7 @@ from .models import Rakuten, Zaim
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 
-class UserSeralizer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
   class Meta:
     model = User
     fields = ('id', 'username', 'password')
@@ -15,13 +15,19 @@ class UserSeralizer(serializers.ModelSerializer):
     token = Token.objects.create(user=user)
     return user
 
-class RakutenSeralizer(serializers.ModelSerializer):
+
+class RakutenSerializer(serializers.ModelSerializer):
+  user = UserSerializer(read_only=True)
+
   class Meta:
     model = Rakuten
     fields = ('id', 'login', 'password', 'user')
     extra_kwargs = {'password': {'write_only': True, 'required': True}}
 
-class ZaimSeralizer(serializers.ModelSerializer):
+
+class ZaimSerializer(serializers.ModelSerializer):
+  user = UserSerializer(read_only=True)
+
   class Meta:
     model = Zaim
     fields = ('id', 'login', 'password', 'user')
