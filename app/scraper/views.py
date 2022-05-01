@@ -12,6 +12,7 @@ SESSION_KEY = 'celery_tasks'
 
 from rest_framework import viewsets
 from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
 from .models import Rakuten, Zaim
 from app.scraper.seralizers import RakutenSeralizer, ZaimSeralizer, UserSeralizer
@@ -25,12 +26,14 @@ class RakutenViewSet(viewsets.ModelViewSet):
   queryset = Rakuten.objects.all()
   serializer_class = RakutenSeralizer
   authentication_classes = (TokenAuthentication, )
+  permission_classes = (IsAuthenticated, )
+
 
 class ZaimViewSet(viewsets.ModelViewSet):
   queryset = Zaim.objects.all()
   serializer_class = ZaimSeralizer
   authentication_classes = (TokenAuthentication, )
-
+  permission_classes = (IsAuthenticated, )
 
 # http://127.0.0.1:8000/zaim
 def hello_world(request):
