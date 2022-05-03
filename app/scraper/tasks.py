@@ -12,7 +12,7 @@ def add(x1, x2):
     return y
 
 
-from .google import upload_to_google
+from .services.google import upload_to_google
 import pandas as pd
 @shared_task
 # Output: success message if succeed, raise Exception if failed
@@ -45,7 +45,7 @@ def scrape_and_upload(username, password, year, month):
 
   return "{} (id: {}) has been uploaded to folder: {}".format(file_name, file_id, ' and '.join(folder_ids))
 
-from .zaim import ZaimCrawler
+from .services.zaim import ZaimCrawler
 from selenium.common.exceptions import WebDriverException
 # Output: json data or exception
 def scrape(username, password, year, month):
@@ -64,12 +64,12 @@ def scrape(username, password, year, month):
   
   return data
 
-from .google import upload_to_google
+from .services.google import upload_to_google
 def upload_file(file_path, mimetype, new_name, parent_ids):
   file_id = upload_to_google(file_path, mimetype, new_name, parent_ids)
   return file_id
 
-from .rakuten import RakutenCrawler
+from .services.rakuten import RakutenCrawler
 # Output: json data or exception
 @shared_task
 def scrape_rakuten(username, password, month, year):

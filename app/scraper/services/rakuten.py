@@ -5,6 +5,8 @@ from selenium.common.exceptions import NoSuchElementException
 import pandas as pd
 import time
 
+from .zaim import ZaimAPI
+
 # Ref: https://massu-keiei.com/python_automation_rakuten_point/
 
 import logging
@@ -64,7 +66,19 @@ class RakutenCrawler:
     def close(self):
         self.driver.close()
 
+
     def get_point_history(self, year, month):
+
+        # zaim_client = ZaimAPI(consumer_id="d698f4ea31f2ac0cfd45fd748153ea4e063ec4ec",
+        #                       consumer_secret="c0c94b31dd52bf0dc9024cce2353c7df3216dbb4", 
+        #                       access_token="YVhqpdGIKNpelVaf3VtlSFBt6ZaeHAyqvD2TrmfiKTU1tUDdvFKqwEl1xORcDK0kjjiQW6Bit1", 
+        #                       access_token_secret="4J2EHnGdhDSQtCw1JXMqFfJfnndFCdYvNvnsMGrbyHOpUsWep90ym30jystQcq", 
+        #                       oauth_verifier="verifier")
+        # print(zaim_client.verify())
+
+        # # データの取得
+        # data = zaim_client.get_data()
+        # print(data)
 
         # 表示ページの定義
         page = 1
@@ -176,7 +190,6 @@ class RakutenCrawler:
         df.to_csv(filename, encoding="utf-8-sig")
         print("終了しました！！")
         return 1
-
 
 class RakutenCrawlerException(Exception):
     def __init__(self, message=''):

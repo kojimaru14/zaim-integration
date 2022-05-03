@@ -16,7 +16,9 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
 from .models import Rakuten, Zaim
 from app.scraper.serializers import RakutenSerializer, ZaimSerializer, UserSerializer
+from rest_framework.decorators import action
 
+from . import tasks
 
 class UserViewSet(viewsets.ModelViewSet):
   queryset = User.objects.all()
@@ -29,8 +31,36 @@ class RakutenViewSet(viewsets.ModelViewSet):
   authentication_classes = (TokenAuthentication, )
   permission_classes = (IsAuthenticated, )
 
+  def get_queryset(self):
+    user = self.request.user
+    return Rakuten.objects.filter(user=user)
+
   def perform_create(self, serializer):
     serializer.save(user=self.request.user)
+
+  @action(detail=False, methods=['get'])
+  def run(self, request, username='', password=''):
+
+    rakuten = self.get_queryset()
+    print(rakuten[0].login, rakuten[0].password)
+
+    if request.method == "GET" and "year" in request.GET and "month" in request.GET:
+      task = tasks.scrape_rakuten.delay(rakuten[0].login, rakuten[0].password, request.GET.get("year"), request.GET.get("month") )
+    else:
+      dt_now = datetime.datetime.now()
+      task = tasks.scrape_rakuten.delay(rakuten[0].login, rakuten[0].password, dt_now.year, dt_now.month)
+
+    # my_tasks = request.session.get(SESSION_KEY)
+
+    # if not my_tasks:  # if no existing task, then save the task id as the value for the session key
+    #   request.session[SESSION_KEY] = task.id
+    # else:             # if there are existing tasks, then concatenate them with the new task.
+    #   request.session[SESSION_KEY] = '{},{}'.format(my_tasks, task.id)
+    
+    return JsonResponse({
+      "message": "Your task has been queued.",
+      "task_id": task.id,
+    })
 
 
 class ZaimViewSet(viewsets.ModelViewSet):
@@ -39,9 +69,36 @@ class ZaimViewSet(viewsets.ModelViewSet):
   authentication_classes = (TokenAuthentication, )
   permission_classes = (IsAuthenticated, )
 
+  def get_queryset(self):
+    user = self.request.user
+    return Zaim.objects.filter(user=user)
+        
   def perform_create(self, serializer):
     serializer.save(user=self.request.user)
+
+  @action(detail=False, methods=['get'])
+  def run(self, request):
+    zaim = self.get_queryset()
+    print(zaim[0].login, zaim[0].password)
+    if request.method == "GET" and "year" in request.GET and "month" in request.GET:
+      task = tasks.scrape_and_upload.delay(zaim[0].login, zaim[0].password, request.GET.get("year"), request.GET.get("month") )
+    else:
+      dt_now = datetime.datetime.now()
+      task = tasks.scrape_and_upload.delay(zaim[0].login, zaim[0].password, dt_now.year, dt_now.month)
+
+    # my_tasks = request.session.get(self.request.user)
+
+    # if not my_tasks:  # if no existing task, then save the task id as the value for the session key
+    #   request.session[SESSION_KEY] = task.id
+    # else:             # if there are existing tasks, then concatenate them with the new task.
+    #   request.session[SESSION_KEY] = '{},{}'.format(my_tasks, task.id)
     
+    return JsonResponse({
+      "message": "Your task has been queued.",
+      "task_id": task.id,
+    })
+
+
 
 # http://127.0.0.1:8000/zaim
 def hello_world(request):
@@ -52,7 +109,6 @@ def hello_world(request):
   return HttpResponse("Please use GET!!")
 
 
-from . import tasks
 '''
 View for adding tasks
 '''
