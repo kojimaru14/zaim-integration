@@ -1,7 +1,9 @@
-from app.scraper import tasks, zaim
+from app.scraper import tasks
 from django.test import TestCase
 from django.conf import settings
 import tempfile
+
+from app.scraper.services import zaim
 
 class TestTasks(TestCase):
 
