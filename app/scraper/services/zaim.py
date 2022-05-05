@@ -10,6 +10,8 @@ from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
 from tqdm import tqdm
 
+from common.util.encryption import decrypt
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -402,8 +404,9 @@ class ZaimCrawler:
             self.close()
             raise ZaimCrawlerException("Login failed for unknown reason.")
 
-    def login(self, user_id, password):
+    def login(self, user_id, encrypted_password):
         retry = 1
+        password = decrypt(encrypted_password)
         print("Start Chrome Driver.")
         self.driver.get(login_url)
         while( retry <= MAX_RETRY ):

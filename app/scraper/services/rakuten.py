@@ -5,6 +5,8 @@ from selenium.common.exceptions import NoSuchElementException
 import pandas as pd
 import time
 
+from common.util.encryption import decrypt
+
 from .zaim import ZaimAPI
 
 # Ref: https://massu-keiei.com/python_automation_rakuten_point/
@@ -37,8 +39,9 @@ class RakutenCrawler:
             self.close()
             raise RakutenCrawlerException("Login failed for unknown reason.")
 
-    def login(self, user_id, password):
+    def login(self, user_id, encrypted_password):
         retry = 1
+        password = decrypt(encrypted_password)
         print("Start Chrome Driver.")
         self.driver.get(RAKUTEN_POINT_URL)
         while( retry <= MAX_RETRY ):
