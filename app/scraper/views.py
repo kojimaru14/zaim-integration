@@ -11,7 +11,7 @@ from app.decorators.basic_auth_decorator import basic_auth
 SESSION_KEY = 'celery_tasks'
 
 from rest_framework import viewsets
-from rest_framework.authentication import TokenAuthentication
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
 from .models import Rakuten, Zaim
@@ -24,11 +24,15 @@ class UserViewSet(viewsets.ModelViewSet):
   queryset = User.objects.all()
   serializer_class = UserSerializer
 
+  def get_queryset(self):
+    user = self.request.user
+    return User.objects.filter(username=user)
+
 
 class RakutenViewSet(viewsets.ModelViewSet):
   queryset = Rakuten.objects.all()
   serializer_class = RakutenSerializer
-  authentication_classes = (TokenAuthentication, )
+  authentication_classes = [TokenAuthentication, SessionAuthentication]
   permission_classes = (IsAuthenticated, )
 
   def get_queryset(self):
@@ -42,7 +46,6 @@ class RakutenViewSet(viewsets.ModelViewSet):
   def run(self, request, username='', password=''):
 
     rakuten = self.get_queryset()
-    print(rakuten[0].login, rakuten[0].password)
 
     if request.method == "GET" and "year" in request.GET and "month" in request.GET:
       task = tasks.scrape_rakuten.delay(rakuten[0].login, rakuten[0].password, request.GET.get("year"), request.GET.get("month") )
@@ -66,7 +69,7 @@ class RakutenViewSet(viewsets.ModelViewSet):
 class ZaimViewSet(viewsets.ModelViewSet):
   queryset = Zaim.objects.all()
   serializer_class = ZaimSerializer
-  authentication_classes = (TokenAuthentication, )
+  authentication_classes = [TokenAuthentication, SessionAuthentication]
   permission_classes = (IsAuthenticated, )
 
   def get_queryset(self):
