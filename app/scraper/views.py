@@ -36,22 +36,19 @@ class RakutenViewSet(viewsets.ModelViewSet):
   permission_classes = (IsAuthenticated, )
 
   def get_queryset(self):
-    user = self.request.user
-    return Rakuten.objects.filter(user=user)
+    return Rakuten.objects.filter(user=self.request.user)
 
   def perform_create(self, serializer):
     serializer.save(user=self.request.user)
 
   @action(detail=False, methods=['get'])
-  def run(self, request, username='', password=''):
-
-    rakuten = self.get_queryset()
-
+  def run(self, request):
+    
     if request.method == "GET" and "year" in request.GET and "month" in request.GET:
-      task = tasks.scrape_rakuten.delay(rakuten[0].login, rakuten[0].password, request.GET.get("year"), request.GET.get("month") )
+      task = tasks.scrape_rakuten.delay(self.request.user.id, request.GET.get("year"), request.GET.get("month") )
     else:
       dt_now = datetime.datetime.now()
-      task = tasks.scrape_rakuten.delay(rakuten[0].login, rakuten[0].password, dt_now.year, dt_now.month)
+      task = tasks.scrape_rakuten.delay(self.request.user.id, dt_now.year, dt_now.month)
 
     # my_tasks = request.session.get(SESSION_KEY)
 
@@ -73,21 +70,19 @@ class ZaimViewSet(viewsets.ModelViewSet):
   permission_classes = (IsAuthenticated, )
 
   def get_queryset(self):
-    user = self.request.user
-    return Zaim.objects.filter(user=user)
+    return Zaim.objects.filter(user=self.request.user)
         
   def perform_create(self, serializer):
     serializer.save(user=self.request.user)
 
   @action(detail=False, methods=['get'])
   def run(self, request):
-    zaim = self.get_queryset()
-    print(zaim[0].login, zaim[0].password)
+
     if request.method == "GET" and "year" in request.GET and "month" in request.GET:
-      task = tasks.scrape_and_upload.delay(zaim[0].login, zaim[0].password, request.GET.get("year"), request.GET.get("month") )
+      task = tasks.scrape_and_upload.delay(self.request.user.id, request.GET.get("year"), request.GET.get("month") )
     else:
       dt_now = datetime.datetime.now()
-      task = tasks.scrape_and_upload.delay(zaim[0].login, zaim[0].password, dt_now.year, dt_now.month)
+      task = tasks.scrape_and_upload.delay(self.request.user.id, dt_now.year, dt_now.month)
 
     # my_tasks = request.session.get(self.request.user)
 

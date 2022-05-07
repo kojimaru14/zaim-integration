@@ -3,6 +3,11 @@ from celery import shared_task, current_task
 import logging
 logger = logging.getLogger(__name__)
 
+from .models import Rakuten, Zaim
+
+def get_cred(model, user_id):
+    return model.objects.filter(user=user_id)
+
 import time
 @shared_task
 def add(x1, x2):
@@ -16,16 +21,18 @@ from .services.google import upload_to_google
 import pandas as pd
 @shared_task
 # Output: success message if succeed, raise Exception if failed
-def scrape_and_upload(username, password, year, month):
+def scrape_and_upload(user_id, year, month):
 
-  file_name = '{}-{}.csv'.format(year, month)
+  file_name = '{}-{}.csv'.format(year, str(month).zfill(2))
   folder_ids = ['1yhw2cEo5nQ7Ym3oZ3mNIpCMuA6qmiwGB']
+
+  zaim = get_cred(Zaim, user_id)
 
   current_task.update_state(
     state="RUNNING",
     meta={"Step": "Fetching zaim data"}
   )
-  data = scrape(username, password, year, month)
+  data = scrape(zaim[0].login, zaim[0].password, year, month)
   
   current_task.update_state(
     state="RUNNING",
@@ -72,12 +79,15 @@ def upload_file(file_path, mimetype, new_name, parent_ids):
 from .services.rakuten import RakutenCrawler
 # Output: json data or exception
 @shared_task
-def scrape_rakuten(username, password, month, year):
-  
+# def scrape_rakuten(username, password, month, year):
+def scrape_rakuten(user_id, month, year):
+
+  rakuten = get_cred(Rakuten, user_id)
+
   try:
-    crawler = RakutenCrawler(username, password, driver_path='/usr/local/bin/chromedriver')
+    crawler = RakutenCrawler(rakuten[0].login, rakuten[0].password, driver_path='/usr/local/bin/chromedriver')
   except WebDriverException:
-    crawler = RakutenCrawler(username, password)
+    crawler = RakutenCrawler(rakuten[0].login, rakuten[0].password)
 
   # data = crawler.get_point_history()
   data = crawler.get_point_history(month, year)
