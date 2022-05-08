@@ -1,7 +1,10 @@
+from unittest import result
 from django.http.response import JsonResponse
 from django.http import HttpResponse
 from celery.result import AsyncResult
+from django_celery_results.models import TaskResult
 import datetime
+from django.core import serializers
 
 # Add "@basic_auth" decorator to a function with which you want to perform authentication
 # More on decorators: https://blog.ikappio.com/decorating-specific-view-basic-authentication-in-django/
@@ -61,7 +64,7 @@ class RakutenViewSet(viewsets.ModelViewSet):
       "message": "Your task has been queued.",
       "task_id": task.id,
     })
-
+  
 
 class ZaimViewSet(viewsets.ModelViewSet):
   queryset = Zaim.objects.all()
@@ -75,27 +78,57 @@ class ZaimViewSet(viewsets.ModelViewSet):
   def perform_create(self, serializer):
     serializer.save(user=self.request.user)
 
-  @action(detail=False, methods=['get'])
-  def run(self, request):
+  @action(detail=False, methods=['get','post'])
+  def task(self, request):
 
-    if request.method == "GET" and "year" in request.GET and "month" in request.GET:
-      task = tasks.scrape_and_upload.delay(self.request.user.id, request.GET.get("year"), request.GET.get("month") )
-    else:
-      dt_now = datetime.datetime.now()
-      task = tasks.scrape_and_upload.delay(self.request.user.id, dt_now.year, dt_now.month)
+    # POST will initiate scraping task
+    if request.method == "POST":
+      if "year" in request.POST and "month" in request.POST:
+        task = tasks.scrape_and_upload.delay(self.request.user.id, request.POST.get("year"), request.POST.get("month") )
+      else:
+        dt_now = datetime.datetime.now()
+        task = tasks.scrape_and_upload.delay(self.request.user.id, dt_now.year, dt_now.month)
 
-    # my_tasks = request.session.get(self.request.user)
+      return JsonResponse({
+        "message": "Your task has been queued.",
+        "task_id": task.id,
+      })
 
-    # if not my_tasks:  # if no existing task, then save the task id as the value for the session key
-    #   request.session[SESSION_KEY] = task.id
-    # else:             # if there are existing tasks, then concatenate them with the new task.
-    #   request.session[SESSION_KEY] = '{},{}'.format(my_tasks, task.id)
+    # GET will return tasks that have already been created
+    if request.method == "GET":
+      
+      query='\"({},'.format(self.request.user.id)
+
+      if "id" in request.GET:
+        task_result = AsyncResult(request.GET.get("id"))
+
+        print("Asycnresult", task_result.info )
+
+        result = {
+          'status': task_result.status,
+          'result': str(task_result.result),
+          'traceback': str(task_result.traceback),
+        }
+        return JsonResponse(result)
+
+      print(query)
+      results = TaskResult.objects.filter(
+          task_args__startswith=query,
+          task_name='app.scraper.tasks.scrape_and_upload',
+      )
+      # ).exclude(
+      #     status='SUCCESS'
+      # )
+    
+      task_list = serializers.serialize("json", results)
+      ret = { "task_list": task_list }
+
+      print(ret)
+      return JsonResponse(data=ret, safe=False)
     
     return JsonResponse({
-      "message": "Your task has been queued.",
-      "task_id": task.id,
+      "message": "Unknown error.",
     })
-
 
 
 # http://127.0.0.1:8000/zaim
