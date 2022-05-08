@@ -98,33 +98,34 @@ class ZaimViewSet(viewsets.ModelViewSet):
     if request.method == "GET":
       
       query='\"({},'.format(self.request.user.id)
+      task_list = []
 
       if "id" in request.GET:
-        task_result = AsyncResult(request.GET.get("id"))
-
-        print("Asycnresult", task_result.info )
-
-        result = {
-          'status': task_result.status,
-          'result': str(task_result.result),
-          'traceback': str(task_result.traceback),
-        }
-        return JsonResponse(result)
-
-      print(query)
-      results = TaskResult.objects.filter(
+        results = TaskResult.objects.filter(
+          task_id=request.GET.get("id"),
           task_args__startswith=query,
           task_name='app.scraper.tasks.scrape_and_upload',
-      )
+        )
+      else:
+        results = TaskResult.objects.filter(
+          task_args__startswith=query,
+          task_name='app.scraper.tasks.scrape_and_upload',
+        )
       # ).exclude(
       #     status='SUCCESS'
       # )
-    
-      task_list = serializers.serialize("json", results)
-      ret = { "task_list": task_list }
 
-      print(ret)
-      return JsonResponse(data=ret, safe=False)
+      for result in results:
+        task_list.append({
+          'task_id': result.task_id,
+          'date_created': result.date_created,
+          'date_done': result.date_done,
+          'status': result.status,
+          'result': str(result.result),
+          'traceback': str(result.traceback),
+        })
+    
+      return JsonResponse(data=task_list, safe=False)
     
     return JsonResponse({
       "message": "Unknown error.",
